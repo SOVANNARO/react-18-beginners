@@ -1,35 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import { Alert } from "./components/Alert";
+import AlertDismissible from "./components/AlertDismissible";
+import Button from "./components/Button";
+import ListGroup from "./components/ListGroup";
 
 function App() {
-  const [count, setCount] = useState(0)
+  let items = ["New York", "San Francisco", "Tokyo", "London"];
+  const [isAlert, setIsAlert] = useState(false);
+
+  const onSelectItem = (item: string) => {
+    console.log(item);
+  };
+
+  const onClickBtn = () => {
+    console.log("Button Clicked");
+  };
+
+  const onClickDismiss = () => {
+    setIsAlert(false);
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <Alert> Alert </Alert>
+      <ListGroup items={items} title="List Group" onSelectItem={onSelectItem} />
+      <Button color="primary" onClick={onClickBtn}>
+        Primary
+      </Button>
+      <AlertDismissible
+        title="Alert Dismissible"
+        isAlert={isAlert}
+        onClose={onClickDismiss}
+      />
+      <div className="pt-2">
+        <Button color="primary" onClick={() => setIsAlert(true)}>
+          Alert Dismissible
+        </Button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
