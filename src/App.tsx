@@ -1,35 +1,23 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import ExpandableText from "./components/ExpandableText";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <ExpandableText maxChars={20}>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi saepe
+        officiis voluptate sapiente laboriosam rerum assumenda. Sed vitae est
+        quod voluptatibus veritatis qui nulla voluptas, culpa, similique nisi
+        perferendis. Tenetur ab dolorum saepe? Ab accusantium impedit delectus
+        nostrum ratione. Necessitatibus quos perferendis impedit quod illo
+        rerum. Reiciendis quia nihil molestias excepturi. Doloribus, esse
+        temporibus! Eius atque corrupti eum, incidunt iste quae repellendus? A
+        nisi natus excepturi obcaecati sapiente aperiam quo, deserunt ipsam, ex
+        deleniti adipisci aut, neque dolorum amet ad officiis! Fugit delectus
+        aliquam sunt veritatis asperiores natus, error ex voluptatum modi
+        ducimus vel molestias repellendus rerum enim voluptate dignissimos!
+      </ExpandableText>
+    </div>
+  );
 }
 
-export default App
+export default App;
