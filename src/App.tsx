@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import userService, { User } from "./services/user-service";
+import useUser from "./hooks/useUser";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const {users, error, loading, setUsers } = useUser();
+
+  const handleDelete = (user: User) => () => {
+    const originalUsers = [...users];
+    setUsers(originalUsers.filter((u) => u.id !== user.id));
+
+    userService.delete(user.id).catch((error) => {
+      console.error("Error deleting user:", error);
+      setUsers(originalUsers); // Revert to original state
+    });
+  };
+
+  const handleAddUser = () => {
+    const newUser = {
+      id: Math.floor(Math.random() * 1000) + 1,
+      name: "New User",
+      email: "newuser@example.com",
+    };
+    setUsers([...users, newUser]);
+
+    userService
+      .add(newUser)
+      .then((response) => {
+        console.log("User added:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error adding user:", error);
+      });
+  };
+
+  const handleEdit = (user: User) => () => {
+    const updatedUser = { ...user, name: "Updated User" };
+    setUsers(users.map((u) => (u.id === user.id ? updatedUser : u)));
+
+    userService.edit(updatedUser).catch((error) => {
+      console.error("Error updating user:", error);
+      setUsers(users.map((u) => (u.id === user.id ? user : u))); // Revert to original state
+    });
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      {error && <p>Error: {error}</p>}
+      {loading && <p>Loading...</p>}
+      <h1>Users</h1>
+      <hr />
+      <button onClick={handleAddUser}>Add User</button>
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>
+            {user.name} - {user.email}{" "}
+            <button onClick={handleEdit(user)}>Edit</button>{" "}
+            <button onClick={handleDelete(user)}>Delete</button>{" "}
+          </li>
+        ))}
+      </ul>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
