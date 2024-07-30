@@ -1,9 +1,11 @@
-import TodoList from "./components/TodoList";
+import InfiniteQuery from "./components/InfiniteQuery";
 
 function App() {
   return (
     <>
-      <TodoList />
+      {/* <TodoList /> */}
+      {/* <PostList /> */}
+      <InfiniteQuery />
     </>
   );
 }
