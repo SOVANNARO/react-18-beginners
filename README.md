@@ -449,3 +449,10 @@ function InfiniteQuery() {
 export default InfiniteQuery;
 
 ```
+
+### 🟢 Next Steps
+- Create mutation
+- Handling mutation errors
+- Implementing optimistic update
+- Creating custom mutation hooks
+- Building services for querying/mutating data
