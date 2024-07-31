@@ -1,4 +1,5 @@
 import TodoForm from "./components/TodoForm";
+import TodoList from "./components/TodoList";
 
 function App() {
   return (
@@ -6,6 +7,7 @@ function App() {
       {/* <TodoList /> */}
       {/* <PostList /> */}
       <TodoForm />
+      <TodoList />
     </>
   );
 }

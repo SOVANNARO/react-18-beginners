@@ -522,3 +522,287 @@ export default TodoForm;
 ```
 
 ### 🟢 Handling Mutation Errors
+
+src/components/TodoForm.tsx
+
+```typeScript
+const addTodo = useMutation<Todo, Error, Todo>({
+    mutationFn: (todo: Todo) =>
+      axios
+        .post<Todo>("https://jsonplaceholder.typicode.com/todos", todo)
+        .then((res) => res.data),
+    onSuccess: (data) => {
+      // APPROACH: Invalidate the cache
+      // useQueries.invalidateQueries({
+      //   queryKey: ["todos"],
+      // });
+
+      // APPROACH 2: updating the data in the cache
+      useQueries.setQueryData<Todo[]>(["posts"], (todos) => [
+        data,
+        ...(todos || []),
+      ]);
+    },
+  });
+```
+
+```typeScript
+{addTodo.error && <div>Error: {addTodo.error.message}</div>}
+```
+
+### 🟢 Show Mutation Progress
+
+```typeScript
+<button disabled={addTodo.isLoading} type="submit">
+   {addTodo.isLoading ? "Loading..." : "Add Todo"}
+</button>
+```
+
+### 🟢 Optimize Updates
+
+src/components/TodoForm.tsx
+
+```typeScript
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
+import { Todo } from "../hooks/useTodo";
+import axios from "axios";
+
+interface AddTodoContext {
+  previousTodos: Todo[];
+}
+
+function TodoForm() {
+  const useQueries = useQueryClient();
+  const addTodo = useMutation<Todo, Error, Todo, AddTodoContext>({
+    mutationFn: (todo: Todo) =>
+      axios
+        .post<Todo>("https://jsonplaceholder.typicode.com/todos", todo)
+        .then((res) => res.data),
+
+    onMutate: (newTodo: Todo) => {
+      const previousTodos = useQueries.getQueryData<Todo[]>(["posts"]) || [];
+
+      useQueries.setQueryData<Todo[]>(["posts"], (todos) => [
+        newTodo,
+        ...(todos || []),
+      ]);
+      useQueries.setQueryData<Todo[]>(["posts"], (todos) => [
+        newTodo,
+        ...(todos || []),
+      ]);
+
+      return { previousTodos };
+    },
+
+    onSuccess: (savedTodo, newTodo) => {
+      useQueries.setQueryData<Todo[]>(["posts"], (todos) =>
+        todos?.map((todo) => (todo.id === newTodo.id ? newTodo : todo))
+      );
+    },
+
+    onError: (error, newTodo, context) => {
+      if (!context) return;
+
+      useQueries.setQueryData<Todo[]>(["todos"], context.previousTodos);
+    },
+  });
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <>
+      {addTodo.error && <div>Error: {addTodo.error.message}</div>}
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          const todoTitle = inputRef.current?.value;
+          if (!todoTitle) return;
+          addTodo.mutate({
+            id: 0,
+            title: inputRef.current?.value,
+            completed: false,
+            userId: 1,
+          });
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Enter todo"
+          className="form-control"
+        />
+        <button type="submit">Add Todo</button>
+      </form>
+    </>
+  );
+}
+
+export default TodoForm;
+
+```
+
+### 🟢 Creating a Custom Mutation Hook
+
+scr/constants/queryKey.ts
+
+```typeScript
+export const CACHE_KEY_TODOS = ["todos"];
+```
+
+src/hooks/useAddTodo.ts
+
+```typeScript
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Todo } from "./useTodo";
+import axios from "axios";
+import { CACHE_KEY_TODOS } from "../constands/queryKey";
+
+interface AddTodoContext {
+  previousTodos: Todo[];
+}
+const useAddTodo = () => {
+  const useQueries = useQueryClient();
+  return useMutation<Todo, Error, Todo, AddTodoContext>({
+    mutationFn: (todo: Todo) =>
+      axios
+        .post<Todo>("https://jsonplaceholder.typicode.com/todos", todo)
+        .then((res) => res.data),
+
+    onMutate: (newTodo: Todo) => {
+      const previousTodos = useQueries.getQueryData<Todo[]>(CACHE_KEY_TODOS) || [];
+
+      useQueries.setQueryData<Todo[]>(CACHE_KEY_TODOS, (todos = []) => [
+        newTodo,
+        ...todos,
+      ]);
+      useQueries.setQueryData<Todo[]>(CACHE_KEY_TODOS, (todos) => [
+        newTodo,
+        ...(todos || []),
+      ]);
+
+      return { previousTodos };
+    },
+
+    onSuccess: (savedTodo, newTodo) => {
+      useQueries.setQueryData<Todo[]>(CACHE_KEY_TODOS, (todos) =>
+        todos?.map((todo) => (todo.id === newTodo.id ? newTodo : todo))
+      );
+    },
+
+    onError: (error, newTodo, context) => {
+      if (!context) return;
+
+      useQueries.setQueryData<Todo[]>(CACHE_KEY_TODOS, context.previousTodos);
+    },
+  });
+};
+
+export default useAddTodo;
+
+```
+
+src/components/TodoForm.tsx
+
+```typeScript
+import { useRef } from "react";
+import useAddTodo from "../hooks/useAddTodo";
+
+function TodoForm() {
+  const addTodo = useAddTodo();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <>
+      {addTodo.error && <div>Error: {addTodo.error.message}</div>}
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          const todoTitle = inputRef.current?.value;
+          if (!todoTitle) return;
+          addTodo.mutate({
+            id: 0,
+            title: inputRef.current?.value,
+            completed: false,
+            userId: 1,
+          });
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Enter todo"
+          className="form-control"
+        />
+        <button type="submit">Add Todo</button>
+      </form>
+    </>
+  );
+}
+
+export default TodoForm;
+
+```
+
+### 🟢 Creating a Reusable API Client
+
+src/services/apiClient.ts
+
+```typeScript
+import axios from "axios";
+
+const axiosInstance = axios.create({
+  baseURL: "https://jsonplaceholder.typicode.com",
+});
+
+class APIClient<T> {
+  endpoint: string;
+
+  constructor(endpoint: string) {
+    this.endpoint = endpoint;
+  }
+
+  getAll = () => {
+    return axiosInstance.get<T[]>(this.endpoint).then((res) => res.data);
+  };
+
+  post = (data: T) => {
+    return axiosInstance.post<T>(this.endpoint, data).then((res) => res.data);
+  };
+}
+
+export default APIClient;
+
+```
+
+using in hooks
+
+```typeScript
+const apiClient = new APIClient<Todo>("/todos");
+
+mutationFn: apiClient.post,
+```
+
+### 🟢 Creating a Reusable HTTP Service
+
+src/services/todoService.ts
+
+```typeScript
+import APIClient from "./apiClient";
+
+export interface Todo {
+  userId: number;
+  id: number;
+  title: string;
+  completed: boolean;
+}
+
+export default new APIClient<Todo>("/todos");
+
+```
+
+### 🟢 Understanding the Application Layers
+
+- **Components**: TodoForm, TodoList
+- **Custom Hooks**: useTodos, useAddToto
+- **HTTP Services**: todoService
+- **API Client**: APIClient

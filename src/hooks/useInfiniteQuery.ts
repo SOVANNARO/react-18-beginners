@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Todo } from "./useTodo";
+import { Todo } from "../services/todoService";
 
 interface PostQuery {
   page: number;

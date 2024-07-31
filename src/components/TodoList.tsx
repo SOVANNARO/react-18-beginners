@@ -1,5 +1,6 @@
 import { useState } from "react";
-import useTodos, { Todo } from "../hooks/useTodo";
+import useTodos from "../hooks/useTodo";
+import { Todo } from "../services/todoService";
 
 function TodoList() {
   const [userId, setUserId] = useState<number>();

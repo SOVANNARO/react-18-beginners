@@ -1,5 +1,5 @@
 import useInfinitePosts from "../hooks/useInfiniteQuery";
-import { Todo } from "../hooks/useTodo";
+import { Todo } from "../services/todoService";
 
 function InfiniteQuery() {
   const pageSize = 10;
