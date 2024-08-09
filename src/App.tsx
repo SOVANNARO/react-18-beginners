@@ -3,15 +3,13 @@ import NavBar from "./components/NavBar";
 import GameGrid from "./components/GameGrid";
 import { GenreList } from "./components/GenreList";
 import { useState } from "react";
-import { Genre } from "./hooks/useGenres";
 import PlatformSelector from "./components/PlatformSelector";
-import { Platform } from "./hooks/useGame";
 import ShortSelector from "./components/ShortSelector";
 import GameHeading from "./components/GameHeading";
 
 export interface GameQuery {
-  genre: Genre | null;
-  platform: Platform | null;
+  genreId?: number;
+  platformId: number;
   sortOrder: string;
   searchText: string;
 }
@@ -38,20 +36,22 @@ function App() {
       <Show above="lg">
         <GridItem area="aside" paddingX={5}>
           <GenreList
-            selectedGenre={gameQuery.genre}
-            onSelectGenre={(genre) => setGameQuery({ ...gameQuery, genre })}
+            selectedGenreId={gameQuery.genreId}
+            onSelectGenre={(genre) =>
+              setGameQuery({ ...gameQuery, genreId: genre.id })
+            }
           />
         </GridItem>
       </Show>
       <GridItem area="main">
-        <GameHeading  gameQuery={gameQuery} />
+        <GameHeading gameQuery={gameQuery} />
         <Flex paddingLeft={5} marginBottom={1} marginTop={2}>
           <Box marginRight={5}>
             <PlatformSelector
               onSelectPlatform={(platform) =>
-                setGameQuery({ ...gameQuery, platform })
+                setGameQuery({ ...gameQuery, platformId: platform.id })
               }
-              selectedPlatform={gameQuery.platform}
+              selectedPlatformId={gameQuery.platformId}
             />
           </Box>
           <ShortSelector
