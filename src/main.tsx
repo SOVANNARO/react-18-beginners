@@ -12,7 +12,7 @@ const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter basename="/react-query-game/">
+    <BrowserRouter basename="/react-18-beginners/">
       <ChakraProvider theme={theme}>
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <QueryClientProvider client={queryClient}>
